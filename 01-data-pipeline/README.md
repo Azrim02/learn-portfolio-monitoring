@@ -7,10 +7,13 @@ Desk question: **can I trust today's numbers?**
 ```bash
 cd 01-data-pipeline
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # already done once
-export TIINGO_API_KEY=...        # free account at tiingo.com; never commit it
+# Put TIINGO_API_KEY=... in ../.env (repo root), then: chmod 600 ../.env
+# Free account at tiingo.com. Never commit the key.
 ```
 
 ## Use
+
+`./desk data` from the repo root loads `.env` and does the same as `run`. The direct commands below do not read `.env`; load it first with `set -a; . ../.env; set +a`.
 
 ```bash
 .venv/bin/python -m pipeline run                        # load and check the last complete session
@@ -19,7 +22,7 @@ export TIINGO_API_KEY=...        # free account at tiingo.com; never commit it
 .venv/bin/python -m pytest
 ```
 
-Exit code: 0 all good, 1 a load or check failed, 2 only TODO checks remain.
+Exit code: 0 all good, 1 a load or check failed, 2 warnings to review.
 
 ## Map
 
@@ -30,25 +33,19 @@ Exit code: 0 all good, 1 a load or check failed, 2 only TODO checks remain.
 | `pipeline/raw.py` | Write-once raw files in `data/raw/` |
 | `pipeline/db.py`, `schema.sql` | DuckDB tables and safe upserts |
 | `pipeline/dates.py` | Stock and bond holidays, publication lag, complete session |
-| `pipeline/checks.py` | **Your work** |
-| `tests/test_todo_checks.py` | **Your targets** |
+| `pipeline/checks.py` | Data quality checks |
 
-## Your work
+## Checks
 
-`missing_values` is complete and is your example. Write, in this order:
+| Check | Result if it finds something |
+|---|---|
+| `missing_values` | FAIL |
+| `stale_prices`: close unchanged for 3 sessions | FAIL |
+| `outliers`: fixed limit (15% price, 50 bp curve), split-adjusted | FAIL |
+| `unusual_moves`: more than 4 standard deviations for that instrument | WARN, a person must look |
+| `duplicate_sources`: two sources disagree | FAIL |
 
-1. `stale_prices`
-2. `outliers`
-3. `duplicate_sources`
-
-Remove the `@todo` mark from its tests as you write each check. An unwritten check reports TODO, never PASS. The tests are a minimum: add cases of your own.
-
-## Done when
-
-- [ ] `run` loads every source with a Tiingo key set
-- [ ] `missing_values` passes on real data
-- [ ] No TODO remains, and all tests pass without the `@todo` mark
-- [ ] The corrupted price test (`349.08` -> `3490.80`) is caught
+A real move can exceed the 15% limit: MSFT on 2026-07-30 and AMZN on 2026-07-31 did. Only one price source is loaded, so `duplicate_sources` has nothing to compare yet.
 
 ## Market details to know
 
@@ -60,7 +57,6 @@ Remove the `@todo` mark from its tests as you write each check. An unwritten che
 
 ## Known limits
 
-- The Tiingo loader is tested only with sample data until a key is set.
 - The OAS calendar is an assumption (`nyse`), based on one holiday.
 - The database keeps the latest value after a restatement. Older values stay only in `data/raw/`.
 - Treasuries have terms but no prices here. Project 2 adds model prices.

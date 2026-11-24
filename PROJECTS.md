@@ -8,19 +8,19 @@ Assumes proficiency in Python, SQL and Excel. The focus is on the market and des
 
 Tested from this machine on 2026-11-24 unless marked otherwise.
 
-| Need | Source | Status and cautions |
-|---|---|---|
-| Equity and ETF prices, volume | Tiingo end-of-day API | Not tested live: needs a free key. Check its current limits and license. |
-| - | `yfinance` (Yahoo) | Responds, but not used: robots.txt on Yahoo's data hosts disallows automated clients. |
-| Treasury par yield curve | Treasury.gov daily CSV | Works, no key. Par yields, so bootstrap before discounting individual cash flows. |
-| Treasury terms (CUSIP, coupon, dates, auction price) | Fiscal Data API, `auctions_query` | Works, no key. Missing values arrive as the string `"null"`. On 2026-11-24 the newest auction was 2026-10-22, so treat it as a source of terms, not of current auctions. |
-| SOFR | New York Fed Markets API | Works, no key. |
-| Yield and credit spread history | FRED (`DGS10`, `BAMLC0A0CM`) | CSV works with the default client and robots.txt allows it (1 second between requests). An official API with a free key also exists. Check history length and series terms. |
-| Euro area curve | ECB Data API | Works, no key. Only needed for euro bonds. |
-| Credit exposure proxy | `LQD`, `HYG` ETFs | Prices from Tiingo, not tested live. |
-| Individual corporate bonds | FINRA fixed income data | Not tested. Free for non-commercial use; automated access needs an agreement or account. Look up manually at first. |
-| Treasury prices by CUSIP | TreasuryDirect FedInvest | Manual browser use only: robots.txt disallows general automated clients. |
-| Stooq | - | Do not use: blocks scripts with a browser check. |
+| Need                                                 | Source                            | Status and cautions                                                                                                                                                         |
+| ---------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Equity and ETF prices, volume                        | Tiingo end-of-day API             | Works with a free key. Check its current limits and license.                                                                                                                |
+| -                                                    | `yfinance` (Yahoo)                | Responds, but not used: robots.txt on Yahoo's data hosts disallows automated clients.                                                                                       |
+| Treasury par yield curve                             | Treasury.gov daily CSV            | Works, no key. Par yields, so bootstrap before discounting individual cash flows.                                                                                           |
+| Treasury terms (CUSIP, coupon, dates, auction price) | Fiscal Data API, `auctions_query` | Works, no key. Missing values arrive as the string `"null"`. On 2026-11-24 the newest auction was 2026-10-22, so treat it as a source of terms, not of current auctions.    |
+| SOFR                                                 | New York Fed Markets API          | Works, no key.                                                                                                                                                              |
+| Yield and credit spread history                      | FRED (`DGS10`, `BAMLC0A0CM`)      | CSV works with the default client and robots.txt allows it (1 second between requests). An official API with a free key also exists. Check history length and series terms. |
+| Euro area curve                                      | ECB Data API                      | Works, no key. Only needed for euro bonds.                                                                                                                                  |
+| Credit exposure proxy                                | `LQD`, `HYG` ETFs                 | Prices from Tiingo.                                                                                                                                                         |
+| Individual corporate bonds                           | FINRA fixed income data           | Not tested. Free for non-commercial use; automated access needs an agreement or account. Look up manually at first.                                                         |
+| Treasury prices by CUSIP                             | TreasuryDirect FedInvest          | Manual browser use only: robots.txt disallows general automated clients.                                                                                                    |
+| Stooq                                                | -                                 | Do not use: blocks scripts with a browser check.                                                                                                                            |
 
 ### Two data rules
 
@@ -31,10 +31,13 @@ Tested from this machine on 2026-11-24 unless marked otherwise.
 
 Simulated holdings, real prices. Record as trades, not as a table of positions.
 
-- 8-10 equities across at least 5 sectors
-- 4 Treasuries, at about 2, 5, 10 and 30 years
-- `LQD` and `HYG` for credit
+Current (kept small on purpose, 4 holdings plus cash):
+
+- 2 equities: AAPL, JPM
+- 2 Treasuries: 2-year and 10-year
 - Cash in USD
+
+Later, add sectors, 5 and 30-year Treasuries, and `LQD`/`HYG` for credit (see `02-valuation/trades_full.csv`). With only two stocks, set the Project 4 single equity and sector limits to suit.
 
 Suggested benchmark: 60% `SPY`, 40% `AGG`. Use total return (include dividends and coupons).
 
@@ -64,7 +67,7 @@ Stack: pandas, DuckDB, QuantLib, Streamlit. Scheduled with cron or a systemd tim
 
 ## Project 1: Data pipeline and quality checks
 
-Scaffold: [`01-data-pipeline/`](01-data-pipeline/README.md)
+Code: [`01-data-pipeline/`](01-data-pipeline/README.md)
 
 **Desk question:** Can I trust today's numbers?
 
@@ -75,6 +78,8 @@ Scaffold: [`01-data-pipeline/`](01-data-pipeline/README.md)
 **Done when:** one command loads a day, and a deliberately corrupted price is caught.
 
 ## Project 2: Positions and valuation
+
+Code: [`02-valuation/`](02-valuation/README.md)
 
 **Desk question:** What do I own, and what is it worth?
 
@@ -88,7 +93,7 @@ Scaffold: [`01-data-pipeline/`](01-data-pipeline/README.md)
 - Formula prices match official auction prices. Already proven: 16 of 16 new 2, 3, 5 and 7-year notes matched to six decimals.
 - Model prices are compared with manually obtained FedInvest prices, and the differences are explained.
 
-The auction test proves the yield-to-price formula on the issue date only. It does not prove accrued interest or curve bootstrapping, so test those separately.
+Accrued interest is also proven against official values (8 auctions). The bootstrap reprices its own par bonds, but agreement with market prices still needs the FedInvest comparison.
 
 ## Project 3: P&L and P&L explain
 
@@ -193,8 +198,8 @@ Start the morning note by hand in week 1.
 
 ## Progress
 
-- [ ] 1 Data pipeline
-- [ ] 2 Valuation
+- [x] 1 Data pipeline
+- [ ] 2 Valuation (built; the manual FedInvest comparison is open)
 - [ ] 3 P&L explain
 - [ ] 4 Limits and alerts
 - [ ] 5 Risk and stress
