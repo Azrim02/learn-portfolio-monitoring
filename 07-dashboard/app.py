@@ -27,14 +27,15 @@ st.set_page_config(page_title="Portfolio monitor", layout="wide")
 
 @st.cache_data
 def load(versions):
-    """All sessions since the first trade. versions: file times, so new data reloads."""
+    """(values for each session, trades, bond ids). versions: file times, so new data reloads."""
     con = duckdb.connect(str(DB), read_only=True)
     try:
         trades = positions.read_trades(TRADES)
         days = [r[0] for r in con.execute(
             "SELECT DISTINCT as_of FROM prices WHERE price_type = 'market' AND as_of >= ? ORDER BY 1",
             [trades[0]["trade_date"]]).fetchall()]
-        return {d: portfolio.value(con, trades, d) for d in days}
+        bonds = {r[0] for r in con.execute("SELECT id FROM instruments WHERE type = 'treasury'").fetchall()}
+        return {d: portfolio.value(con, trades, d) for d in days}, trades, bonds
     finally:
         con.close()
 
@@ -51,7 +52,7 @@ def data_checks(versions, day):
 try:
     files = (DB, TRADES, config.ROOT / "config.toml")
     versions = tuple(f.stat().st_mtime_ns for f in files)
-    history = load(versions)
+    history, trades, bonds = load(versions)
 except FileNotFoundError as e:
     st.error(f"File not found: {e.filename}. Run ./desk data first.")
     st.stop()
@@ -160,6 +161,25 @@ else:
         "Duration": n(format="%.2f"), "DV01": n(format="%.1f")})
 st.caption("Treasury prices are model prices from the par curve, not quotes. "
            "Bond quantity is face value; bond price is per 100 of face.")
+
+st.subheader("Trade history")
+done = [t for t in trades if t["trade_date"] <= day]
+st.dataframe(pd.DataFrame([{
+    "Trade date": t["trade_date"], "Side": t["side"].capitalize(),
+    "Holding": NAMES.get(t["instrument"], t["instrument"]), "Quantity": t["quantity"], "Price": t["price"],
+    "Accrued": t["quantity"] * t["accrued"] / (100 if t["instrument"] in bonds else 1), "Fees": t["fees"],
+    "Cash": positions.cash_flow(t, bonds), "Settle date": t["settle_date"],
+    "Status": "Settled" if t["settle_date"] <= day else "Pending", "ID": t["id"]}
+    for t in reversed(done)]), hide_index=True, width="stretch", column_config={
+        "Trade date": st.column_config.DateColumn(format="DD MMM YYYY"),
+        "Settle date": st.column_config.DateColumn(format="DD MMM YYYY"),
+        "Quantity": st.column_config.NumberColumn(format="localized"),
+        "Price": st.column_config.NumberColumn(format="%.3f"),
+        "Accrued": st.column_config.NumberColumn(format="%,.2f"),
+        "Fees": st.column_config.NumberColumn(format="%,.2f"),
+        "Cash": st.column_config.NumberColumn(format="%+,.0f", help="Negative: you paid. Includes accrued interest and fees.")})
+st.caption(f"{len(done)} trades on or before {day:%d %b %Y}, newest first. Net cash "
+           f"{sum(positions.cash_flow(t, bonds) for t in done):+,.0f}.")
 
 st.subheader("P&L since start, by source")
 income = v["income"]

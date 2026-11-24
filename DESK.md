@@ -128,7 +128,7 @@ Stores the Treasury model prices with `price_type = 'model'`. The report does no
 
 ### `./desk dashboard`
 
-Opens a page at http://localhost:8501 with data status, NAV, holdings and P&L by source. Press `Ctrl+C` to stop it. See `07-dashboard/README.md`.
+Opens a page at http://localhost:8501 with data status, NAV, holdings, trade history and P&L by source. Press `Ctrl+C` to stop it. See `07-dashboard/README.md`.
 
 ### `./desk test`
 

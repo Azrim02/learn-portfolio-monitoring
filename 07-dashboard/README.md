@@ -14,6 +14,7 @@ Press `Ctrl+C` in the terminal to stop it. The page is visible only on this comp
 | Headline numbers | NAV and its change, P&L, DV01, settled cash |
 | Data status | Runs the Project 1 checks for that date. Read it before the numbers |
 | NAV / Value by holding | Hover for exact values |
+| Trade history | Each purchase and sale up to the chosen date, newest first, with the cash paid or received |
 | Holdings, P&L by source | The same numbers as `./desk report` |
 
 The page only reads. It does not download data: run `./desk data`, then reload the page.

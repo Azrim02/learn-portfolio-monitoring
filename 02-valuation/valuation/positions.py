@@ -34,6 +34,13 @@ def read_trades(path):
     return sorted(rows, key=lambda t: (t["trade_date"], t["id"]))
 
 
+def cash_flow(trade, bonds=frozenset()):
+    """Cash from one trade: negative for a purchase. Includes accrued interest and fees."""
+    unit = 100 if trade["instrument"] in bonds else 1   # bonds are quoted per 100 of face
+    sign = 1 if trade["side"] == "BUY" else -1
+    return -sign * trade["quantity"] * (trade["price"] + trade["accrued"]) / unit - trade["fees"]
+
+
 def build(trades, as_of, bonds=frozenset(), actions=(), coupons=()):
     """Return ({instrument: Position}, cash, income).
 
@@ -68,7 +75,7 @@ def build(trades, as_of, bonds=frozenset(), actions=(), coupons=()):
             continue
 
         p = book.setdefault(e["instrument"], Position())
-        unit = 100 if e["instrument"] in bonds else 1   # bonds are quoted per 100 of face
+        unit = 100 if e["instrument"] in bonds else 1
         sign = 1 if e["side"] == "BUY" else -1
         clean = e["quantity"] * e["price"] / unit
         accrued = e["quantity"] * e["accrued"] / unit
@@ -81,7 +88,7 @@ def build(trades, as_of, bonds=frozenset(), actions=(), coupons=()):
         else:
             p.cost += clean
         p.quantity += sign * e["quantity"]
-        flow = -sign * (clean + accrued) - e["fees"]
+        flow = cash_flow(e, bonds)
         cash["traded"] += flow
         if e["settle_date"] <= as_of:
             cash["settled"] += flow
