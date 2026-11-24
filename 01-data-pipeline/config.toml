@@ -1,0 +1,110 @@
+# Universe, series and check thresholds. Thresholds are learning defaults.
+
+[settings]
+lookback_days = 10          # calendar days fetched before the target date
+
+[checks]
+stale_sessions = 3          # unchanged close for this many sessions
+outlier_return = 0.15       # absolute daily move, equity and ETF
+outlier_curve_bp = 50       # absolute daily move, curve tenor
+unusual_sigma = 4           # move against its own normal size
+unusual_window = 250        # earlier sessions used for the normal size
+unusual_min_history = 60
+duplicate_tolerance = 0.001 # relative difference between two sources
+
+[curve]
+id = "UST_PAR"
+calendar = "bond"
+lag = 0
+required_tenors = [3, 6, 12, 24, 36, 60, 84, 120, 240, 360]   # months
+
+# lag = business days between the observation date and normal publication
+[[series]]
+id = "SOFR"
+source = "nyfed"
+calendar = "bond"
+lag = 1
+
+[[series]]
+id = "BAMLC0A0CM"           # US investment grade OAS, percent
+source = "fred"
+calendar = "nyse"           # published on Veterans Day 2026, unlike the par curve
+lag = 1
+
+[[series]]
+id = "BAMLH0A0HYM2"         # US high yield OAS, percent
+source = "fred"
+calendar = "nyse"
+lag = 1
+
+[[instruments]]
+id = "AAPL"
+type = "equity"
+sector = "Technology"
+[[instruments]]
+id = "MSFT"
+type = "equity"
+sector = "Technology"
+[[instruments]]
+id = "JPM"
+type = "equity"
+sector = "Financials"
+[[instruments]]
+id = "JNJ"
+type = "equity"
+sector = "Health Care"
+[[instruments]]
+id = "XOM"
+type = "equity"
+sector = "Energy"
+[[instruments]]
+id = "PG"
+type = "equity"
+sector = "Consumer Staples"
+[[instruments]]
+id = "AMZN"
+type = "equity"
+sector = "Consumer Discretionary"
+[[instruments]]
+id = "CAT"
+type = "equity"
+sector = "Industrials"
+[[instruments]]
+id = "NEE"
+type = "equity"
+sector = "Utilities"
+
+[[instruments]]
+id = "LQD"
+type = "etf"
+sector = "IG credit"
+[[instruments]]
+id = "HYG"
+type = "etf"
+sector = "HY credit"
+[[instruments]]
+id = "SPY"
+type = "etf"
+sector = "Benchmark"
+[[instruments]]
+id = "AGG"
+type = "etf"
+sector = "Benchmark"
+
+# Treasury terms come from the Fiscal Data API. Project 2 adds model prices.
+[[instruments]]
+id = "91282CRP8"
+type = "treasury"
+sector = "Government"
+[[instruments]]
+id = "91282CRN3"
+type = "treasury"
+sector = "Government"
+[[instruments]]
+id = "91282CRF0"
+type = "treasury"
+sector = "Government"
+[[instruments]]
+id = "912810UW6"
+type = "treasury"
+sector = "Government"
