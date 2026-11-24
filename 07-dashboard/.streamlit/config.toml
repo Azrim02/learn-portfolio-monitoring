@@ -1,0 +1,5 @@
+[server]
+address = "localhost"     # only this computer
+headless = true
+[browser]
+gatherUsageStats = false

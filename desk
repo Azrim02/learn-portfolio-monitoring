@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One entry point. Usage: ./desk data | check | report | validate | save | test  [options]
+# One entry point. Usage: ./desk data | check | report | validate | save | dashboard | test  [options]
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 py="$here/01-data-pipeline/.venv/bin/python"
@@ -9,6 +9,7 @@ case "$cmd" in
   data)  cd "$here/01-data-pipeline" && exec "$py" -m pipeline run "$@" ;;
   check) cd "$here/01-data-pipeline" && exec "$py" -m pipeline check "$@" ;;
   report|validate|save) cd "$here/02-valuation" && exec "$py" -m valuation "$cmd" "$@" ;;
-  test)  (cd "$here/01-data-pipeline" && "$py" -m pytest -q); cd "$here/02-valuation" && "$py" -m pytest -q ;;
+  dashboard) cd "$here/07-dashboard" && exec "$py" -m streamlit run app.py "$@" ;;
+  test)  (cd "$here/01-data-pipeline" && "$py" -m pytest -q); (cd "$here/02-valuation" && "$py" -m pytest -q); cd "$here/07-dashboard" && "$py" -m pytest -q ;;
   *)     sed -n 2p "$0"; exit 1 ;;
 esac

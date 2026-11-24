@@ -24,6 +24,7 @@ Run it after about 19:00 New York time to get that day's close. Before then, the
 | `report` | Show holdings, value, P&L and rate risk | No | - |
 | `validate` | Compare the bond maths with official auctions | No | - |
 | `save` | Store the Treasury model prices | No | Database |
+| `dashboard` | Show the portfolio on a local web page | No | - |
 | `test` | Run the automated tests | No | - |
 
 | Option | Works with | Meaning |
@@ -125,9 +126,13 @@ Stores the Treasury model prices with `price_type = 'model'`. The report does no
 
 > **Caution:** `report` and `save` do not reject a future date. They use the last known prices. Do not run `save` with a future date, because it overwrites the saved model price of the last curve date.
 
+### `./desk dashboard`
+
+Opens a page at http://localhost:8501 with data status, NAV, holdings and P&L by source. Press `Ctrl+C` to stop it. See `07-dashboard/README.md`.
+
 ### `./desk test`
 
-Runs the tests of both projects. They use sample data, not your database, so a pass says the code works, not that today's data is good.
+Runs the tests of all projects. Projects 1 and 2 use sample data. The dashboard test opens the page with your database. A pass says the code works, not that today's data is good.
 
 ---
 

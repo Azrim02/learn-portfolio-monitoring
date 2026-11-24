@@ -155,6 +155,8 @@ These levels are learning defaults, not industry standards. Set them from your o
 
 ## Project 7: Dashboard and morning note
 
+Code: [`07-dashboard/`](07-dashboard/README.md)
+
 **Desk question:** What needs my attention now?
 
 Dashboard order: data status, breaches, P&L, exposure, risk, liquidity.
@@ -204,5 +206,5 @@ Start the morning note by hand in week 1.
 - [ ] 4 Limits and alerts
 - [ ] 5 Risk and stress
 - [ ] 6 Liquidity and execution
-- [ ] 7 Dashboard and morning note
+- [ ] 7 Dashboard and morning note (first dashboard version built)
 - [ ] 8 Reconciliation
